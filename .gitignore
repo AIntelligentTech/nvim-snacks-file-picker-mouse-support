@@ -1,0 +1,29 @@
+# Neovim
+doc/tags
+
+# Lua
+*.luac
+lua_modules/
+.luarocks/
+
+# LSP
+.luarc.local.json
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.tests/
+coverage/
+
+# Build artifacts
+*.rock

@@ -1,0 +1,227 @@
+*snacks-explorer-mouse.txt*  Mouse context menu for snacks.nvim explorer
+
+==============================================================================
+CONTENTS                                      *snacks-explorer-mouse-contents*
+
+    1. Introduction .................... |snacks-explorer-mouse-introduction|
+    2. Requirements .................... |snacks-explorer-mouse-requirements|
+    3. Installation .................... |snacks-explorer-mouse-installation|
+    4. Configuration ................... |snacks-explorer-mouse-configuration|
+    5. Usage ........................... |snacks-explorer-mouse-usage|
+    6. Commands ........................ |snacks-explorer-mouse-commands|
+    7. Mappings ........................ |snacks-explorer-mouse-mappings|
+    8. API ............................. |snacks-explorer-mouse-api|
+    9. Terminal Setup .................. |snacks-explorer-mouse-terminal-setup|
+   10. Troubleshooting ................. |snacks-explorer-mouse-troubleshooting|
+
+==============================================================================
+1. INTRODUCTION                           *snacks-explorer-mouse-introduction*
+
+snacks-explorer-mouse adds mouse context menu support to the snacks.nvim
+file explorer/picker. It brings familiar GUI-style right-click menus to
+your terminal Neovim workflow.
+
+Features:
+- Right-click context menu with file operations
+- Copy, paste, rename, delete files and directories
+- Create new files and directories
+- Copy file paths to clipboard
+- Keyboard shortcut fallback via <Plug> mappings
+- Automatic explorer refresh after operations
+
+==============================================================================
+2. REQUIREMENTS                           *snacks-explorer-mouse-requirements*
+
+- Neovim >= 0.9.0
+- snacks.nvim (https://github.com/folke/snacks.nvim)
+- Terminal with mouse support (see |snacks-explorer-mouse-terminal-setup|)
+
+==============================================================================
+3. INSTALLATION                           *snacks-explorer-mouse-installation*
+
+Using lazy.nvim: >lua
+    {
+      "yourusername/nvim-snacks-file-picker-mouse-support",
+      dependencies = { "folke/snacks.nvim" },
+      event = "VeryLazy",
+      opts = {},
+    }
+<
+Using packer.nvim: >lua
+    use {
+      "yourusername/nvim-snacks-file-picker-mouse-support",
+      requires = { "folke/snacks.nvim" },
+      config = function()
+        require("snacks-explorer-mouse").setup()
+      end
+    }
+<
+==============================================================================
+4. CONFIGURATION                         *snacks-explorer-mouse-configuration*
+
+The plugin works out of the box with sensible defaults. Configuration is
+optional.
+
+Default configuration: >lua
+    require("snacks-explorer-mouse").setup({
+      -- Refresh explorer after file operations
+      refresh_after_action = true,
+
+      -- Show notifications for operations
+      notify_operations = true,
+
+      -- Register to use for copy/paste operations
+      copy_register = "e",
+    })
+<
+You can also configure via |vim.g|: >lua
+    vim.g.snacks_explorer_mouse_refresh = false
+    vim.g.snacks_explorer_mouse_notify = true
+<
+==============================================================================
+5. USAGE                                         *snacks-explorer-mouse-usage*
+
+1. Open the snacks explorer (typically `<leader>e` in LazyVim)
+2. Navigate to a file or directory
+3. Right-click to open the context menu
+4. Select an action from the menu
+
+The context menu shows different options based on whether you clicked on
+a file or directory:
+
+File menu:
+- Copy - Copy file to internal clipboard
+- Paste - Paste previously copied file
+- Rename - Rename the file
+- Delete - Delete with confirmation
+- Copy Path - Copy full path to system clipboard
+
+Directory menu (includes above plus):
+- New File - Create a new file in this directory
+- New Directory - Create a new subdirectory
+
+==============================================================================
+6. COMMANDS                                   *snacks-explorer-mouse-commands*
+
+:SnacksExplorerMenu                                       *:SnacksExplorerMenu*
+    Open the context menu for the item under cursor.
+
+:SnacksExplorerDebug                                     *:SnacksExplorerDebug*
+    Print debug information about the picker state.
+
+==============================================================================
+7. MAPPINGS                                   *snacks-explorer-mouse-mappings*
+
+The plugin provides <Plug> mappings for user customization:
+
+<Plug>(SnacksExplorerMenu)                         *<Plug>(SnacksExplorerMenu)*
+    Open the context menu. Example mapping: >lua
+        vim.keymap.set("n", "<leader>m", "<Plug>(SnacksExplorerMenu)")
+<
+Buffer-local mappings (automatically set in snacks_picker_list buffers):
+
+<RightMouse>    Open context menu at mouse position
+<Plug>(...)     Keyboard access to context menu
+
+==============================================================================
+8. API                                             *snacks-explorer-mouse-api*
+
+The plugin exposes a Lua API for programmatic access:
+
+snacks-explorer-mouse.setup({opts})           *snacks-explorer-mouse.setup()*
+    Configure the plugin. See |snacks-explorer-mouse-configuration|.
+
+snacks-explorer-mouse.show_context_menu()
+                                      *snacks-explorer-mouse.show_context_menu()*
+    Show the context menu for the current item.
+
+snacks-explorer-mouse.get_picker()        *snacks-explorer-mouse.get_picker()*
+    Get the active snacks picker instance.
+    Returns: picker or nil, error string
+
+snacks-explorer-mouse.get_current_item()
+                                       *snacks-explorer-mouse.get_current_item()*
+    Get the item under cursor.
+    Returns: item table or nil, error string
+
+snacks-explorer-mouse.get_file_path(item)
+                                        *snacks-explorer-mouse.get_file_path()*
+    Get the full file path from a picker item.
+    Returns: string path or nil
+
+File operation functions:
+- `copy_file(path)` - Copy to internal register
+- `paste_file(target_path)` - Paste from register
+- `rename_file(path)` - Rename with prompt
+- `delete_file(path)` - Delete with confirmation
+- `create_file(dir_path)` - Create new file
+- `create_directory(dir_path)` - Create new directory
+- `copy_path(path)` - Copy path to clipboard
+
+snacks-explorer-mouse.debug()                *snacks-explorer-mouse.debug()*
+    Print debug information to :messages.
+
+==============================================================================
+9. TERMINAL SETUP                       *snacks-explorer-mouse-terminal-setup*
+
+For right-click to work, your terminal must pass mouse events to Neovim.
+
+KITTY ~
+
+Add to ~/.config/kitty/kitty.conf: >
+    mouse_map right press ungrabbed no-op
+<
+This prevents Kitty from intercepting right-click for paste.
+
+ALACRITTY ~
+
+Mouse events are passed through by default.
+
+WEZTERM ~
+
+Mouse events are passed through by default.
+
+ITERM2 ~
+
+Go to Preferences > Profiles > Terminal and check:
+"Report mouse clicks"
+
+WINDOWS TERMINAL ~
+
+Mouse events are passed through by default.
+
+==============================================================================
+10. TROUBLESHOOTING                   *snacks-explorer-mouse-troubleshooting*
+
+Menu doesn't appear on right-click ~
+
+1. Check terminal setup (see |snacks-explorer-mouse-terminal-setup|)
+2. Ensure you're in the explorer window (filetype should be snacks_picker_list)
+3. Run `:SnacksExplorerDebug` for diagnostic information
+
+"No item under cursor" error ~
+
+1. Make sure cursor is on a file/directory line
+2. Run `:SnacksExplorerDebug` to check picker state
+3. Ensure snacks.nvim explorer is properly loaded
+
+Operations don't refresh the explorer ~
+
+Check your configuration: >lua
+    require("snacks-explorer-mouse").setup({
+      refresh_after_action = true,
+    })
+<
+Debug command ~
+
+Run `:SnacksExplorerDebug` or: >lua
+    :lua require("snacks-explorer-mouse").debug()
+<
+This prints:
+- Plugin version and initialization state
+- Snacks.nvim status
+- Active picker information
+- Current item detection results
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:

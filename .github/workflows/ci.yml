@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: "5.1"
+
+      - name: Install LuaRocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Install luacheck
+        run: luarocks install luacheck
+
+      - name: Run luacheck
+        run: luacheck lua/ plugin/ --globals vim --no-max-line-length
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install lua-language-server
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://github.com/LuaLS/lua-language-server/releases/latest/download/lua-language-server-3.7.4-linux-x64.tar.gz | tar xz -C ~/.local
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run type check
+        run: |
+          cat > .luarc.json << 'EOF'
+          {
+            "runtime": {
+              "version": "LuaJIT"
+            },
+            "workspace": {
+              "library": [
+                "$VIMRUNTIME/lua",
+                "${3rd}/luv/library"
+              ],
+              "checkThirdParty": false
+            },
+            "diagnostics": {
+              "globals": ["vim"]
+            }
+          }
+          EOF
+          ~/.local/bin/lua-language-server --check lua/ || true
+
+  vimdoc:
+    name: Vimdoc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate vimdoc
+        run: |
+          # Check that doc file exists
+          test -f doc/snacks-explorer-mouse.txt
+
+          # Check for required sections
+          grep -q "CONTENTS" doc/snacks-explorer-mouse.txt
+          grep -q "INTRODUCTION" doc/snacks-explorer-mouse.txt
+          grep -q "INSTALLATION" doc/snacks-explorer-mouse.txt
+          grep -q "CONFIGURATION" doc/snacks-explorer-mouse.txt
+
+  test:
+    name: Test (Neovim ${{ matrix.neovim }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim: ["v0.9.5", "v0.10.2", "nightly"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim }}
+
+      - name: Run tests
+        run: |
+          # Basic smoke test - check plugin loads without errors
+          nvim --headless -c "lua require('snacks-explorer-mouse')" -c "q" 2>&1 | tee output.txt
+          ! grep -i "error" output.txt
