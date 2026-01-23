@@ -31,6 +31,6 @@ and this project adheres to
 - LuaCATS type annotations for IDE support
 
 [Unreleased]:
-  https://github.com/yourusername/nvim-snacks-file-picker-mouse-support/compare/v1.0.0...HEAD
+  https://github.com/AIntelligentTech/nvim-snacks-file-picker-mouse-support/compare/v1.0.0...HEAD
 [1.0.0]:
-  https://github.com/yourusername/nvim-snacks-file-picker-mouse-support/releases/tag/v1.0.0
+  https://github.com/AIntelligentTech/nvim-snacks-file-picker-mouse-support/releases/tag/v1.0.0

@@ -31,7 +31,7 @@ Mouse context menu support for
 
 ```lua
 {
-  "yourusername/nvim-snacks-file-picker-mouse-support",
+  "AIntelligentTech/nvim-snacks-file-picker-mouse-support",
   dependencies = { "folke/snacks.nvim" },
   event = "VeryLazy",
   opts = {},
@@ -42,7 +42,7 @@ Mouse context menu support for
 
 ```lua
 use {
-  "yourusername/nvim-snacks-file-picker-mouse-support",
+  "AIntelligentTech/nvim-snacks-file-picker-mouse-support",
   requires = { "folke/snacks.nvim" },
   config = function()
     require("snacks-explorer-mouse").setup()
